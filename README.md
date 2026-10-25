@@ -1,8 +1,8 @@
-## Project Repositories
+## Project Branches
 
-- [Android](https://github.com/tuandinh2404/homeserve_android)
-- [Flutter](https://github.com/tuandinh2404/homeserve_flutter)
-- [Backend](https://github.com/tuandinh2404/homeserve_backend)
+- [Android (Admin)](https://github.com/tuandinh2404/HomeServe/tree/admin-android) — nhánh `admin-android`
+- [Flutter (Client)](https://github.com/tuandinh2404/HomeServe/tree/client-flutter) — nhánh `client-flutter`
+- [Backend](https://github.com/tuandinh2404/HomeServe/tree/backend) — nhánh `backend`
 
 # HomeServe
 
@@ -35,6 +35,8 @@ HomeServe aims to simplify the process of finding, booking, and managing home re
 
 ## Project Structure
 
-- `HomeServe_Android` — Android application
-- `HomeServe_Flutter` — Flutter application
-- `HomeServe_Backend` — Backend services
+Mỗi project nằm trên một nhánh riêng, các nhánh không merge vào nhau:
+
+- nhánh `admin-android` → thư mục `admin-android/` — Android application
+- nhánh `client-flutter` → thư mục `client-flutter/` — Flutter application
+- nhánh `backend` → thư mục `backend/` — Backend services
