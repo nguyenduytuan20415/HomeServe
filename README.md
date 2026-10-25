@@ -1,8 +1,8 @@
 ## Project Repositories
 
-- [Android](https://github.com/tuandinh2404/homeserve-android)
-- [Flutter](https://github.com/tuandinh2404/homeserve-flutter)
-- [Backend](https://github.com/tuandinh2404/homeserve-backend)
+- [Android](https://github.com/tuandinh2404/homeserve_android)
+- [Flutter](https://github.com/tuandinh2404/homeserve_flutter)
+- [Backend](https://github.com/tuandinh2404/homeserve_backend)
 
 # HomeServe
 
@@ -28,7 +28,10 @@ HomeServe aims to simplify the process of finding, booking, and managing home re
 
 ## Team
 
-Developed collaboratively by a team of 4 members.
+1. Nguyễn Đình Tuấn - Nhóm trưởng
+2. Nguyễn Duy Tuấn - Thành viên
+3. Nguyễn Hoàng Thông - Thành viên
+4. Huỳnh Minh Tâm - Thành viên
 
 ## Project Structure
 
