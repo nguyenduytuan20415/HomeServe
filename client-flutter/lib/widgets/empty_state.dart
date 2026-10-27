@@ -11,16 +11,24 @@ class EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(40),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 64, color: AppTheme.muted.withValues(alpha: 0.5)),
-            const SizedBox(height: 12),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.06),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 44, color: AppTheme.primary.withValues(alpha: 0.6)),
+            ),
+            const SizedBox(height: 20),
+            Text(title, style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
             if (subtitle != null) ...[
-              const SizedBox(height: 6),
-              Text(subtitle!, textAlign: TextAlign.center, style: const TextStyle(color: AppTheme.muted)),
+              const SizedBox(height: 8),
+              Text(subtitle!, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
             ],
           ],
         ),

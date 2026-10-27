@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/service_request.dart';
 import '../../providers/data_providers.dart';
-import '../../utils/constants.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/constants.dart';
 import '../../widgets/status_chip.dart';
 import 'payment_screen.dart';
 import 'rating_screen.dart';
@@ -48,16 +48,20 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Hủy yêu cầu?'),
-        content: const Text('Bạn có chắc muốn hủy yêu cầu này?'),
+        content: const Text('Bạn có chắc muốn hủy yêu cầu này? Thao tác không thể hoàn tác.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Không')),
-          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Hủy')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.danger),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Hủy đơn'),
+          ),
         ],
       ),
     );
-    if (ok != true) return;
-    if (!mounted) return;
+    if (ok != true || !mounted) return;
     await context.read<RequestProvider>().cancel(widget.requestId);
     if (!mounted) return;
     await _load();
@@ -69,59 +73,77 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     if (_error != null || _r == null) return Scaffold(appBar: AppBar(), body: Center(child: Text(_error ?? 'Lỗi')));
     final r = _r!;
     return Scaffold(
-      appBar: AppBar(title: Text('Yêu cầu #${r.id}')),
+      backgroundColor: AppTheme.bg,
+      appBar: AppBar(backgroundColor: AppTheme.bg, foregroundColor: AppTheme.text, elevation: 0, title: Text('Yêu cầu #${r.id}')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(child: Text(r.tenDichVu ?? 'Dịch vụ', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
-                StatusChip(status: r.trangThai),
-              ],
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(AppTheme.radius), boxShadow: [AppTheme.cardShadow]),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: Text(r.tenDichVu ?? 'Dịch vụ', style: Theme.of(context).textTheme.titleLarge)),
+                      StatusChip(status: r.trangThai),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text('Mã đơn #${r.id}', style: Theme.of(context).textTheme.bodySmall),
+                  const SizedBox(height: 14),
+                  _infoRow(Icons.description_outlined, 'Mô tả', r.moTa),
+                  _infoRow(Icons.location_on_outlined, 'Địa chỉ', r.diaChi),
+                  _infoRow(Icons.map_outlined, 'Khu vực', r.khuVuc),
+                  if (r.thoiGianMongMuon != null) _infoRow(Icons.schedule_rounded, 'Thời gian mong muốn', r.thoiGianMongMuon!),
+                  if (r.thoiGianDuKienToi != null) _infoRow(Icons.access_time_rounded, 'Thợ dự kiến tới', r.thoiGianDuKienToi!),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-            _section('Mô tả', r.moTa),
-            _section('Địa chỉ', r.diaChi),
-            _section('Khu vực', r.khuVuc),
-            if (r.thoiGianMongMuon != null) _section('Thời gian mong muốn', r.thoiGianMongMuon!),
-            if (r.thoiGianDuKienToi != null) _section('Thợ dự kiến tới', r.thoiGianDuKienToi!),
-            const SizedBox(height: 12),
-            if (r.tho != null) _workerCard(r.tho!),
-            const SizedBox(height: 12),
+            if (r.tho != null) ...[
+              const SizedBox(height: 16),
+              _workerCard(r.tho!),
+            ],
+            const SizedBox(height: 16),
             _timeline(r.trangThai),
             const SizedBox(height: 20),
             if (r.trangThai == 'CHO_NHAN' || r.trangThai == 'DA_NHAN') ...[
               ElevatedButton.icon(
                 onPressed: _simulate,
-                icon: const Icon(Icons.play_arrow),
+                icon: const Icon(Icons.play_arrow_rounded),
                 label: const Text('Mô phỏng thợ nhận việc (demo)'),
               ),
-              const SizedBox(height: 8),
-              OutlinedButton(
-                onPressed: r.trangThai != 'DANG_LAM' ? _cancel : null,
-                style: OutlinedButton.styleFrom(foregroundColor: AppTheme.danger),
-                child: const Text('Hủy yêu cầu'),
-              ),
+              const SizedBox(height: 10),
+              if (r.trangThai != 'DANG_LAM')
+                OutlinedButton(
+                  onPressed: _cancel,
+                  style: OutlinedButton.styleFrom(foregroundColor: AppTheme.danger, side: const BorderSide(color: AppTheme.danger)),
+                  child: const Text('Hủy yêu cầu'),
+                ),
             ],
             if (r.trangThai == 'DA_NHAN' || r.trangThai == 'DANG_LAM') ...[
-              const SizedBox(height: 8),
-              ElevatedButton(
+              const SizedBox(height: 10),
+              ElevatedButton.icon(
                 onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => PaymentScreen(requestId: r.id))),
-                child: const Text('Xác nhận hoàn tất & thanh toán'),
+                icon: const Icon(Icons.payments_rounded),
+                label: const Text('Xác nhận hoàn tất & thanh toán'),
               ),
             ],
             if (r.trangThai == 'HOAN_TAT') ...[
-              const SizedBox(height: 8),
-              ElevatedButton(
+              const SizedBox(height: 10),
+              ElevatedButton.icon(
                 onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => RatingScreen(requestId: r.id, workerId: r.tho?.id ?? 0))),
-                child: const Text('Đánh giá thợ'),
+                icon: const Icon(Icons.star_rounded),
+                label: const Text('Đánh giá thợ'),
               ),
-              const SizedBox(height: 8),
-              OutlinedButton(
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
                 onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ComplaintScreen(requestId: r.id))),
-                child: const Text('Gửi khiếu nại'),
+                icon: const Icon(Icons.report_problem_outlined),
+                label: const Text('Gửi khiếu nại'),
               ),
             ],
           ],
@@ -130,72 +152,107 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     );
   }
 
-  Widget _section(String k, String v) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+  Widget _infoRow(IconData icon, String k, String v) => Padding(
+        padding: const EdgeInsets.only(bottom: 10),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(width: 150, child: Text(k, style: const TextStyle(color: AppTheme.muted))),
-            Expanded(child: Text(v, style: const TextStyle(fontWeight: FontWeight.w500))),
+            Icon(icon, size: 18, color: AppTheme.muted),
+            const SizedBox(width: 10),
+            SizedBox(width: 120, child: Text(k, style: const TextStyle(color: AppTheme.muted, fontSize: 13))),
+            Expanded(child: Text(v, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14))),
           ],
         ),
       );
 
   Widget _workerCard(WorkerSummary w) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            CircleAvatar(backgroundColor: AppTheme.primary.withValues(alpha: 0.1), child: const Icon(Icons.person, color: AppTheme.primary)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(w.hoTen, style: const TextStyle(fontWeight: FontWeight.w600)),
-                  Text('${w.diemTb.toStringAsFixed(1)} ★ · ${w.soViecDaLam} việc', style: const TextStyle(color: AppTheme.muted, fontSize: 13)),
-                  if (w.khuVuc != null) Text(w.khuVuc!, style: const TextStyle(color: AppTheme.muted, fontSize: 12)),
-                ],
-              ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(AppTheme.radius), boxShadow: [AppTheme.cardShadow]),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(color: AppTheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(14)),
+            child: const Icon(Icons.person_rounded, color: AppTheme.primary, size: 28),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(w.hoTen, style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    const Icon(Icons.star_rounded, size: 14, color: AppTheme.accent),
+                    const SizedBox(width: 2),
+                    Text(w.diemTb.toStringAsFixed(1), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                    const SizedBox(width: 8),
+                    Text('${w.soViecDaLam} việc đã làm', style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
+                if (w.khuVuc != null) Text(w.khuVuc!, style: Theme.of(context).textTheme.bodySmall),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _timeline(String status) {
     final steps = ['CHO_NHAN', 'DA_NHAN', 'DANG_LAM', 'HOAN_TAT'];
-    final idx = steps.indexOf(status);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Tiến trình', style: TextStyle(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 8),
-        Row(
-          children: List.generate(steps.length, (i) {
-            final done = idx >= i && status != 'HUY';
-            return Expanded(
-              child: Column(
-                children: [
-                  Container(
-                    height: 6,
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                    decoration: BoxDecoration(
-                      color: done ? AppTheme.primary : const Color(0xFFE5E7EB),
-                      borderRadius: BorderRadius.circular(4),
+    final idx = status == 'HUY' ? -1 : steps.indexOf(status);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(AppTheme.radius), boxShadow: [AppTheme.cardShadow]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Tiến trình', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppTheme.text)),
+          const SizedBox(height: 14),
+          Row(
+            children: List.generate(steps.length, (i) {
+              final done = idx >= i && status != 'HUY';
+              final active = idx == i;
+              return Expanded(
+                child: Column(
+                  children: [
+                    Container(
+                      height: 6,
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      decoration: BoxDecoration(
+                        gradient: done ? AppTheme.headerGradient : null,
+                        color: done ? null : AppTheme.border,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(AppConstants.statusLabel(steps[i]), style: TextStyle(fontSize: 10, color: done ? AppTheme.primary : AppTheme.muted)),
+                    const SizedBox(height: 6),
+                    Text(
+                      AppConstants.statusLabel(steps[i]),
+                      style: TextStyle(fontSize: 10, fontWeight: active ? FontWeight.w700 : FontWeight.w500, color: done ? AppTheme.primary : AppTheme.muted),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+          if (status == 'HUY')
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Row(
+                children: const [
+                  Icon(Icons.cancel_rounded, size: 16, color: AppTheme.danger),
+                  SizedBox(width: 6),
+                  Text('Đơn đã bị hủy', style: TextStyle(color: AppTheme.danger, fontWeight: FontWeight.w600, fontSize: 13)),
                 ],
               ),
-            );
-          }),
-        ),
-      ],
+            ),
+        ],
+      ),
     );
   }
 }
-

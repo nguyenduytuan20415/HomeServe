@@ -24,39 +24,72 @@ class _PaymentScreenState extends State<PaymentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Thanh toán')),
+      backgroundColor: AppTheme.bg,
+      appBar: AppBar(backgroundColor: AppTheme.bg, foregroundColor: AppTheme.text, elevation: 0, title: const Text('Thanh toán')),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: const [
-                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Tổng tiền'), Text('350.000 đ', style: TextStyle(fontWeight: FontWeight.bold))]),
-                    SizedBox(height: 8),
-                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Hoa hồng (10%)'), Text('35.000 đ')]),
-                    SizedBox(height: 8),
-                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Thợ nhận', style: TextStyle(fontWeight: FontWeight.w600)), Text('315.000 đ', style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.primary))]),
-                  ],
-                ),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(AppTheme.radius), boxShadow: [AppTheme.cardShadow]),
+              child: Column(
+                children: [
+                  _row('Tổng tiền dịch vụ', '350.000 đ', bold: false),
+                  const SizedBox(height: 8),
+                  _row('Hoa hồng (10%)', '35.000 đ'),
+                  const Divider(height: 20),
+                  _row('Thợ nhận', '315.000 đ', bold: true, color: AppTheme.primary),
+                ],
               ),
             ),
             const SizedBox(height: 20),
-            const Text('Phương thức thanh toán', style: TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
-            RadioListTile<String>(value: 'TienMat', groupValue: _method, title: const Text('Tiền mặt'), onChanged: (v) => setState(() => _method = v!)),
-            RadioListTile<String>(value: 'ChuyenKhoan', groupValue: _method, title: const Text('Chuyển khoản'), onChanged: (v) => setState(() => _method = v!)),
-            RadioListTile<String>(value: 'ViDienTu', groupValue: _method, title: const Text('Ví điện tử'), onChanged: (v) => setState(() => _method = v!)),
+            const Text('Phương thức thanh toán', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppTheme.text)),
+            const SizedBox(height: 10),
+            _methodTile('TienMat', 'Tiền mặt', Icons.payments_outlined),
+            _methodTile('ChuyenKhoan', 'Chuyển khoản', Icons.account_balance_outlined),
+            _methodTile('ViDienTu', 'Ví điện tử', Icons.wallet_outlined),
             const Spacer(),
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: _processing ? null : _pay,
-              child: _processing
-                  ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              icon: const Icon(Icons.check_circle_outline_rounded),
+              label: _processing
+                  ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.2))
                   : const Text('Xác nhận thanh toán'),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _row(String k, String v, {bool bold = false, Color? color}) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(k, style: TextStyle(color: bold ? AppTheme.text : AppTheme.text2, fontWeight: bold ? FontWeight.w600 : FontWeight.w400)),
+          Text(v, style: TextStyle(fontWeight: FontWeight.w700, color: color ?? AppTheme.text)),
+        ],
+      );
+
+  Widget _methodTile(String value, String label, IconData icon) {
+    final selected = _method == value;
+    return GestureDetector(
+      onTap: () => setState(() => _method = value),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: selected ? AppTheme.primary : AppTheme.border, width: selected ? 1.6 : 1),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: selected ? AppTheme.primary : AppTheme.muted),
+            const SizedBox(width: 12),
+            Expanded(child: Text(label, style: TextStyle(fontWeight: selected ? FontWeight.w600 : FontWeight.w500))),
+            if (selected) const Icon(Icons.check_circle_rounded, color: AppTheme.primary),
           ],
         ),
       ),

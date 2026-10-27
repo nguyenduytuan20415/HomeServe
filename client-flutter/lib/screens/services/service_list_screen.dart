@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/service.dart';
 import '../../providers/data_providers.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/cards.dart';
 import '../../widgets/empty_state.dart';
 import 'service_detail_screen.dart';
@@ -26,13 +27,19 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   Widget build(BuildContext context) {
     final sp = context.watch<ServiceProvider>();
     return Scaffold(
-      appBar: AppBar(title: Text(widget.category?.ten ?? 'Tất cả dịch vụ')),
+      backgroundColor: AppTheme.bg,
+      appBar: AppBar(
+        backgroundColor: AppTheme.bg,
+        foregroundColor: AppTheme.text,
+        elevation: 0,
+        title: Text(widget.category?.ten ?? 'Tất cả dịch vụ'),
+      ),
       body: sp.loading && sp.services.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : sp.services.isEmpty
-              ? const EmptyState(title: 'Không có dịch vụ')
+              ? const EmptyState(title: 'Không có dịch vụ', icon: Icons.search_off_rounded)
               : ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                   itemCount: sp.services.length,
                   itemBuilder: (_, i) => ServiceCard(
                     service: sp.services[i],

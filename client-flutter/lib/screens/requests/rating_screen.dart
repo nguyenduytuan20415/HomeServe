@@ -25,35 +25,47 @@ class _RatingScreenState extends State<RatingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final labels = ['Rất tệ', 'Tệ', 'Bình thường', 'Tốt', 'Xuất sắc'];
     return Scaffold(
-      appBar: AppBar(title: const Text('Đánh giá')),
+      backgroundColor: AppTheme.bg,
+      appBar: AppBar(backgroundColor: AppTheme.bg, foregroundColor: AppTheme.text, elevation: 0, title: const Text('Đánh giá')),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            const Text('Bạn hài lòng với dịch vụ?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 20),
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(color: AppTheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
+              child: const Icon(Icons.person_rounded, size: 40, color: AppTheme.primary),
+            ),
             const SizedBox(height: 16),
+            const Text('Bạn hài lòng với dịch vụ?', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.text)),
+            const SizedBox(height: 6),
+            Text(labels[_stars - 1], style: const TextStyle(color: AppTheme.accent, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(5, (i) {
                 final v = i + 1;
                 return IconButton(
-                  icon: Icon(v <= _stars ? Icons.star : Icons.star_border, size: 36, color: AppTheme.accent),
+                  icon: Icon(v <= _stars ? Icons.star_rounded : Icons.star_outline_rounded, size: 40, color: AppTheme.accent),
                   onPressed: () => setState(() => _stars = v),
                 );
               }),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             TextField(
               controller: _comment,
               maxLines: 4,
-              decoration: const InputDecoration(labelText: 'Nhận xét (tuỳ chọn)'),
+              decoration: const InputDecoration(labelText: 'Nhận xét (tuỳ chọn)', alignLabelWithHint: true),
             ),
             const Spacer(),
             ElevatedButton(
               onPressed: _submitting ? null : _submit,
               child: _submitting
-                  ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.2))
                   : const Text('Gửi đánh giá'),
             ),
           ],
